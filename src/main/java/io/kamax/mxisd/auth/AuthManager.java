@@ -43,28 +43,24 @@ import io.kamax.mxisd.exception.RemoteLoginException;
 import io.kamax.mxisd.invitation.InvitationManager;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.strategy.LookupStrategy;
-import io.kamax.mxisd.util.RestClientUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.client5.http.classic.methods.CloseableHttpResponse;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.core5.net.URIBuilder;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import io.kamax.mxisd.util.RestClientUtils;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.net.URISyntaxException;
 
 public class AuthManager {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthManager.class);
+    private static final Logger log = Logger.getLogger(AuthManager.class.getName());
 
     private static final String TypeKey = "type";
     private static final String UserKey = "user";
@@ -74,7 +70,7 @@ public class AuthManager {
     private static final String UserIdTypeValue = "m.id.user";
     private static final String ThreepidTypeValue = "m.id.thirdparty";
 
-    private final Gson gson = GsonUtil.get(); // FIXME replace
+    private final Gson gson = GsonUtil.get();
 
     private List<AuthenticatorProvider> providers;
     private MatrixConfig mxCfg;
@@ -82,7 +78,8 @@ public class AuthManager {
     private InvitationManager invMgr;
     private ClientDnsOverwrite dns;
     private LookupStrategy strategy;
-    private CloseableHttpClient client;
+    // Swapped out CloseableHttpClient with Java's native HttpClient.
+    private HttpClient client;
 
     public AuthManager(
             MxisdConfig cfg,
@@ -90,7 +87,7 @@ public class AuthManager {
             LookupStrategy strategy,
             InvitationManager invMgr,
             ClientDnsOverwrite dns,
-            CloseableHttpClient client
+            HttpClient client
     ) {
         this.cfg = cfg.getAuth();
         this.mxCfg = cfg.getMatrix();
@@ -101,11 +98,16 @@ public class AuthManager {
         this.client = client;
     }
 
+    // Uses the native URI transformation (assuming dns.transform now returns a URIBuilder)
     public String resolveProxyUrl(URI target) {
-        URIBuilder builder = dns.transform(target);
-        String urlToLogin = builder.toString();
-        log.info("Proxy resolution: {} to {}", target.toString(), urlToLogin);
-        return urlToLogin;
+        try {
+            var transformed = dns.transform(target).build(); 
+            String urlToLogin = transformed.toString();
+            log.log(Level.INFO, "Proxy resolution: {0} to {1}", new Object[] { target, urlToLogin });
+            return urlToLogin;
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Failed to resolve proxy URL", e);
+        }
     }
 
     public UserAuthResult authenticate(String id, String password) {
@@ -115,7 +117,7 @@ public class AuthManager {
                 continue;
             }
 
-            log.info("Attempting authentication with store {}", provider.getClass().getSimpleName());
+            log.log(Level.INFO, "Attempting authentication with store {0}", provider.getClass().getSimpleName());
 
             BackendAuthResult result = provider.authenticate(mxid, password);
             if (result.isSuccess()) {
@@ -125,7 +127,7 @@ public class AuthManager {
                 } else if (UserIdType.MatrixID.is(result.getId().getType())) {
                     mxId = MatrixID.asAcceptable(result.getId().getValue()).getId();
                 } else {
-                    log.warn("Unsupported User ID type {} for backend {}", result.getId().getType(), provider.getClass().getSimpleName());
+                    log.log(Level.WARNING, "Unsupported User ID type {0} for backend {1}", new Object[]{result.getId().getType(), provider.getClass().getSimpleName()});
                     continue;
                 }
 
@@ -133,16 +135,16 @@ public class AuthManager {
                 for (_ThreePid pid : result.getProfile().getThreePids()) {
                     authResult.withThreePid(pid.getMedium(), pid.getAddress());
                 }
-                log.info("{} was authenticated by {}, publishing 3PID mappings, if any", id, provider.getClass().getSimpleName());
+                log.log(Level.INFO, "{0} was authenticated by {1}, publishing 3PID mappings, if any", new Object[] { id, provider.getClass().getSimpleName() });
                 for (ThreePid pid : authResult.getThreePids()) {
-                    log.info("Processing {} for {}", pid, id);
+                    log.log(Level.INFO, "Processing {0} for {1}", new Object[] { pid, id });
                     invMgr.publishMappingIfInvited(new ThreePidMapping(pid, mxId));
                 }
 
                 try {
                     MatrixID.asAcceptable(mxId);
                 } catch (IllegalArgumentException e) {
-                    log.warn("The returned User ID {} is not a valid Matrix ID. Login might fail at the Homeserver level", mxId);
+                    log.log(Level.WARNING, "The returned User ID {0} is not a valid Matrix ID. Login might fail at the Homeserver level", mxId);
                 }
 
                 invMgr.lookupMappingsForInvites();
@@ -155,33 +157,28 @@ public class AuthManager {
     }
 
     public String proxyLogin(URI target, String body) {
-        JsonObject reqJsonObject = io.kamax.matrix.json.GsonUtil.parseObj(body);
+        JsonObject reqJsonObject = GsonUtil.parseObj(body);
 
+        // Process rewriting of login info for User ID types and third party identifiers
         GsonUtil.findObj(reqJsonObject, IdentifierKey).ifPresent(obj -> {
             GsonUtil.findString(obj, TypeKey).ifPresent(type -> {
-                if (StringUtils.equals(type, UserIdTypeValue)) {
+                if (UserIdTypeValue.equals(type)) {
                     log.info("Login request is User ID type");
-
                     if (cfg.getRewrite().getUser().getRules().isEmpty()) {
                         log.info("No User ID rewrite rules to apply");
                     } else {
                         log.info("User ID rewrite rules: checking for a match");
-
                         String userId = GsonUtil.getStringOrThrow(obj, UserKey);
                         for (AuthenticationConfig.Rule m : cfg.getRewrite().getUser().getRules()) {
                             if (m.getPattern().matcher(userId).matches()) {
-                                log.info("Found matching pattern, resolving to 3PID with medium {}", m.getMedium());
-
-                                // Remove deprecated login info on the top object if exists to avoid duplication
+                                log.info(String.format("Found matching pattern, resolving to 3PID with medium %s", m.getMedium()));
                                 reqJsonObject.remove(UserKey);
                                 obj.addProperty(TypeKey, ThreepidTypeValue);
                                 obj.addProperty(ThreepidMediumKey, m.getMedium());
                                 obj.addProperty(ThreepidAddressKey, userId);
-
                                 log.info("Rewrite to 3PID done");
                             }
                         }
-
                         log.info("User ID rewrite rules: done checking rules");
                     }
                 }
@@ -190,14 +187,12 @@ public class AuthManager {
 
         GsonUtil.findObj(reqJsonObject, IdentifierKey).ifPresent(obj -> {
             GsonUtil.findString(obj, TypeKey).ifPresent(type -> {
-                if (StringUtils.equals(type, ThreepidTypeValue)) {
-                    // Remove deprecated login info if exists to avoid duplication
+                if (ThreepidTypeValue.equals(type)) {
                     reqJsonObject.remove(ThreepidMediumKey);
                     reqJsonObject.remove(ThreepidAddressKey);
-
                     GsonUtil.findPrimitive(obj, ThreepidMediumKey).ifPresent(medium -> {
                         GsonUtil.findPrimitive(obj, ThreepidAddressKey).ifPresent(address -> {
-                            log.info("Login request with medium '{}' and address '{}'", medium.getAsString(), address.getAsString());
+                            log.log(Level.INFO, "Login request with medium '{0}' and address '{1}'", new Object[]{medium.getAsString(), address.getAsString()});
                             strategy.findLocal(medium.getAsString(), address.getAsString()).ifPresent(lookupDataOpt -> {
                                 obj.remove(ThreepidMediumKey);
                                 obj.remove(ThreepidAddressKey);
@@ -208,14 +203,12 @@ public class AuthManager {
                     });
                 }
 
-                if (StringUtils.equals(type, "m.id.phone")) {
-                    // Remove deprecated login info if exists to avoid duplication
+                if ("m.id.phone".equals(type)) {
                     reqJsonObject.remove(ThreepidMediumKey);
                     reqJsonObject.remove(ThreepidAddressKey);
-
                     GsonUtil.findPrimitive(obj, "number").ifPresent(number -> {
                         GsonUtil.findPrimitive(obj, "country").ifPresent(country -> {
-                            log.info("Login request with phone '{}'-'{}'", country.getAsString(), number.getAsString());
+                            log.log(Level.INFO, "Login request with phone '{0}'-'{1}'", new Object[]{country.getAsString(), number.getAsString()});
                             try {
                                 PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
                                 Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number.getAsString(), country.getAsString());
@@ -228,7 +221,7 @@ public class AuthManager {
                                     obj.addProperty(UserKey, lookupDataOpt.getMxid().getLocalPart());
                                 });
                             } catch (NumberParseException e) {
-                                log.error("Not a valid phone number");
+                                log.log(Level.SEVERE, "Not a valid phone number");
                                 throw new RuntimeException(e);
                             }
                         });
@@ -237,45 +230,45 @@ public class AuthManager {
             });
         });
 
-        // invoke 'login' on homeserver
-        HttpPost httpPost = RestClientUtils.post(resolveProxyUrl(target), gson, reqJsonObject);
-        try (CloseableHttpResponse httpResponse = client.execute(httpPost)) {
-            // check http status
-            int status = httpResponse.getStatusLine().getStatusCode();
-            log.info("http status = {}", status);
+        // Build a native HttpRequest using the resolved proxy URL and the JSON body
+        URI proxyUri = URI.create(resolveProxyUrl(target));
+        HttpRequest request = HttpRequest.newBuilder(proxyUri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(reqJsonObject)))
+                .build();
+
+        try {
+            HttpResponse<InputStream> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            int status = httpResponse.statusCode();
+            log.log(Level.INFO, "http status = {0}", status);
             if (status != 200) {
-                // try to get possible json error message from response
-                // otherwise just get returned plain error message
-                String errcode = String.valueOf(httpResponse.getStatusLine().getStatusCode());
-                String error = EntityUtils.toString(httpResponse.getEntity());
-                if (httpResponse.getEntity() != null) {
-                    try {
-                        JsonObject bodyJson = new JsonParser().parse(error).getAsJsonObject();
-                        if (bodyJson.has("errcode")) {
-                            errcode = bodyJson.get("errcode").getAsString();
-                        }
-                        if (bodyJson.has("error")) {
-                            error = bodyJson.get("error").getAsString();
-                        }
-                        throw new RemoteLoginException(status, errcode, error, bodyJson);
-                    } catch (JsonSyntaxException e) {
-                        log.warn("Response body is not JSON");
+                String errcode = String.valueOf(status);
+                // Read the error response using InputStream.readAllBytes()
+                String error = new String(httpResponse.body().readAllBytes(), StandardCharsets.UTF_8);
+                try {
+                    JsonObject bodyJson = JsonParser.parseString(error).getAsJsonObject();
+                    if (bodyJson.has("errcode")) {
+                        errcode = bodyJson.get("errcode").getAsString();
                     }
+                    if (bodyJson.has("error")) {
+                        error = bodyJson.get("error").getAsString();
+                    }
+                    throw new RemoteLoginException(status, errcode, error, bodyJson);
+                } catch (JsonSyntaxException e) {
+                    log.log(Level.WARNING, "Response body is not JSON");
                 }
                 throw new RemoteLoginException(status, errcode, error);
             }
 
-            // return response
-            HttpEntity entity = httpResponse.getEntity();
-            if (Objects.isNull(entity)) {
-                log.warn("Expected HS to return data but got nothing");
+            InputStream entityStream = httpResponse.body();
+            if (entityStream == null) {
+                log.log(Level.WARNING, "Expected HS to return data but got nothing");
                 return "";
             } else {
-                return IOUtils.toString(httpResponse.getEntity().getContent(), StandardCharsets.UTF_8);
+                return new String(entityStream.readAllBytes(), StandardCharsets.UTF_8);
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
-
 }
