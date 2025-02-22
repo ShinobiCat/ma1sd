@@ -13,5 +13,6 @@ out/
 # Local dev storage
 /ma1sd.db
 
-# env
+# My list of ignored files
+.context
 .env
