@@ -1,9 +1,9 @@
 Package: ma1sd
-Maintainer: ma1uta <sablintolya@gmail.com>
-Homepage: https://github.com/ma1uta/ma1sd
+Maintainer: ma1uta <god@croak.world>
+Homepage: https://github.com/ShinobiCat/ma1sd
 Description: Federated Matrix Identity Server
 Architecture: all
 Section: net
 Priority: optional
-Depends: openjdk-8-jre | openjdk-8-jre-headless | openjdk-8-jdk | openjdk-8-jdk-headless | openjdk-11-jre | openjdk-11-jre-headless | openjdk-11-jdk | openjdk-11-jdk-headless
+Depends: openjdk-21-jre | openjdk-21-jre-headless | openjdk-21-jdk | openjdk-21-jdk-headless
 Version: 0
