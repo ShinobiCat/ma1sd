@@ -26,20 +26,21 @@ import io.kamax.matrix._MatrixID;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.UserID;
 import io.kamax.mxisd.UserIdType;
+import io.kamax.mxisd.auth.AuthManager;
 import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.backend.rest.RestAuthRequestJson;
 import io.kamax.mxisd.config.ExecConfig;
 import io.kamax.mxisd.exception.InternalServerError;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.Objects;
 import java.util.Optional;
 
 public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
 
-    private transient final Logger log = LoggerFactory.getLogger(ExecAuthStore.class);
+    private static final Logger log = Logger.getLogger(AuthManager.class.getName());
 
     private ExecConfig.Auth cfg;
 
@@ -58,7 +59,7 @@ public class ExecAuthStore extends ExecStore implements AuthenticatorProvider {
         Objects.requireNonNull(uId);
         Objects.requireNonNull(password);
 
-        log.info("Performing authentication for {}", uId.getId());
+        log.info(String.format("Performing authentication for %s", uId.getId()));
 
         ExecAuthResult result = new ExecAuthResult();
         result.setId(new UserID(UserIdType.Localpart, uId.getLocalPart()));
