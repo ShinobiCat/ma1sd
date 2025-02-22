@@ -25,7 +25,7 @@ import io.kamax.matrix.hs._MatrixRoom;
 import io.kamax.mxisd.Mxisd;
 import io.kamax.mxisd.lookup.SingleLookupReply;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.lang.text.StrBuilder;
+import org.apache.commons.lang3.text.StrBuilder;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
