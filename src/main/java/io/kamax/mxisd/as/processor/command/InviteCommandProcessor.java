@@ -26,7 +26,7 @@ import io.kamax.mxisd.Mxisd;
 import io.kamax.mxisd.invitation.IThreePidInviteReply;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang.text.StrBuilder;
+import org.apache.commons.lang3.text.StrBuilder;
 
 import java.util.List;
 
