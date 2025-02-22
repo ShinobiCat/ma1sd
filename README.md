@@ -1,3 +1,7 @@
+# THIS PROJECT IS **BROKEN** AND CURRENTLY UNDER ACTIVE DEVELOPMENT
+
+# The goal is to completely refactor the code and support jdk21, removing any deprecated and/or unnesescary external dependencies
+
 ma1sd - Federated Matrix Identity Server
 ----------------------------------------
 ![Travis-CI build status](https://travis-ci.org/ma1uta/ma1sd.svg?branch=master)  
