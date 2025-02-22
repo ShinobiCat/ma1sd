@@ -90,10 +90,16 @@ dependencies {
     // Config management
     api 'org.yaml:snakeyaml:2.0' // Updated
 
+    // Connection Pool
+    api 'com.mchange:c3p0:0.9.5.5' // new version unknown
+
     // Dependencies from old Matrix-java-sdk
     api 'org.apache.commons:commons-lang3:3.13.0' // Updated
     api 'com.squareup.okhttp3:okhttp:4.11.0' // Updated
     api 'commons-codec:commons-codec:1.16.0' // Updated
+
+    // Gson for JSON parsing
+    api 'com.google.code.gson:gson:2.8.9' // Updated
 
     // ORMLite
     api 'com.j256.ormlite:ormlite-jdbc:6.1' // Updated
@@ -102,7 +108,7 @@ dependencies {
     api 'net.i2p.crypto:eddsa:0.3.0' // No newer version available
 
     // LDAP connector
-    api 'org.apache.directory.api:api-all:2.0.3' // Updated
+    api 'org.apache.directory.api:api-all:2.1.7' // Updated
 
     // DNS lookups
     api 'dnsjava:dnsjava:3.5.0' // Updated

@@ -31,7 +31,7 @@ import io.kamax.mxisd.lookup.SingleLookupRequest;
 import io.kamax.mxisd.lookup.ThreePidMapping;
 import io.kamax.mxisd.lookup.provider.IThreePidProvider;
 import io.kamax.mxisd.util.RestClientUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

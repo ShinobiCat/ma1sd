@@ -24,8 +24,8 @@ import io.kamax.mxisd.Mxisd;
 import io.kamax.mxisd.config.MxisdConfig;
 import io.kamax.mxisd.dns.FederationDnsOverwrite;
 import io.kamax.mxisd.matrix.HomeserverFederationResolver;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

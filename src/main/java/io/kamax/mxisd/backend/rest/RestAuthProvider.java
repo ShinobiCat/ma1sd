@@ -25,7 +25,7 @@ import io.kamax.mxisd.auth.provider.AuthenticatorProvider;
 import io.kamax.mxisd.auth.provider.BackendAuthResult;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
 import io.kamax.mxisd.util.RestClientUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import java.io.IOException;

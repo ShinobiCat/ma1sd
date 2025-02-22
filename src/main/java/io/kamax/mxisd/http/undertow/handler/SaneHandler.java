@@ -28,7 +28,7 @@ import io.kamax.mxisd.exception.*;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

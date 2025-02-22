@@ -25,8 +25,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.kamax.mxisd.config.rest.RestBackendConfig;
 import io.kamax.mxisd.util.GsonParser;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 
 public class RestProvider {
 

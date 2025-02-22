@@ -1,6 +1,6 @@
 package io.kamax.mxisd.exception;
 
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 
 public class RemoteHomeServerException extends HttpMatrixException {
 

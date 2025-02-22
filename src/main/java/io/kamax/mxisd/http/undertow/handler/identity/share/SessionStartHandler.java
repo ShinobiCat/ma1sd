@@ -30,7 +30,7 @@ import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.http.undertow.handler.ApiHandler;
 import io.kamax.mxisd.session.SessionManager;
 import io.undertow.server.HttpServerExchange;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

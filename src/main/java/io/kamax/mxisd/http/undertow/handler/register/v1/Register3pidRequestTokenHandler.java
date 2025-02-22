@@ -31,7 +31,7 @@ import io.kamax.mxisd.http.io.identity.SessionPhoneTokenRequestJson;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.registration.RegistrationManager;
 import io.undertow.server.HttpServerExchange;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

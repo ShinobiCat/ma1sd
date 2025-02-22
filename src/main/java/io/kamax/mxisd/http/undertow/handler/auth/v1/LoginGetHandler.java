@@ -22,10 +22,10 @@ package io.kamax.mxisd.http.undertow.handler.auth.v1;
 
 import io.kamax.mxisd.auth.AuthManager;
 import io.undertow.server.HttpServerExchange;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import java.net.URI;
 

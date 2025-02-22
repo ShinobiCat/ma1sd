@@ -28,10 +28,10 @@ import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.dns.ClientDnsOverwrite;
 import io.kamax.mxisd.exception.InternalServerError;
 import io.kamax.mxisd.proxy.Response;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

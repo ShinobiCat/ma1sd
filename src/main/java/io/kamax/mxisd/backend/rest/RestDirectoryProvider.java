@@ -29,7 +29,7 @@ import io.kamax.mxisd.http.io.UserDirectorySearchRequest;
 import io.kamax.mxisd.http.io.UserDirectorySearchResult;
 import io.kamax.mxisd.util.RestClientUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.CloseableHttpResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

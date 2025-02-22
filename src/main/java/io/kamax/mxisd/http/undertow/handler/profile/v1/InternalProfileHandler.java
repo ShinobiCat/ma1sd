@@ -25,7 +25,7 @@ import io.kamax.matrix._MatrixID;
 import io.kamax.matrix.json.GsonUtil;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.undertow.server.HttpServerExchange;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 
 import java.net.URI;
 import java.util.Optional;

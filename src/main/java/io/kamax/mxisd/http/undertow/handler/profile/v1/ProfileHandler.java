@@ -26,7 +26,7 @@ import io.kamax.mxisd.http.undertow.handler.HomeserverProxyHandler;
 import io.kamax.mxisd.profile.ProfileManager;
 import io.kamax.mxisd.proxy.Response;
 import io.undertow.server.HttpServerExchange;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 
 import java.net.URI;
 import java.util.Optional;

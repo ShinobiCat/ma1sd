@@ -31,10 +31,10 @@ import io.kamax.mxisd.exception.RemoteHomeServerException;
 import io.kamax.mxisd.http.undertow.handler.BasicHttpHandler;
 import io.kamax.mxisd.invitation.InvitationManager;
 import io.undertow.server.HttpServerExchange;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.CloseableHttpResponse;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
