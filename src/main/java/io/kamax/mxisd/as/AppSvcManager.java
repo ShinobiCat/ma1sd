@@ -148,7 +148,8 @@ public class AppSvcManager {
 
         SynapseRegistrationYaml syncCfg = SynapseRegistrationYaml.parse(cfg.getAppsvc(), cfg.getMatrix().getDomain());
 
-        Representer rep = new Representer();
+        
+        Representer rep = new Representer(null);
         rep.getPropertyUtils().setBeanAccess(BeanAccess.FIELD);
         Yaml yaml = new Yaml(rep);
 
