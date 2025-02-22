@@ -12,3 +12,6 @@ out/
 
 # Local dev storage
 /ma1sd.db
+
+# env
+.env
