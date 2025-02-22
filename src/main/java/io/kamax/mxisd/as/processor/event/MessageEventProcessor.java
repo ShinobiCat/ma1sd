@@ -32,7 +32,7 @@ import io.kamax.mxisd.as.processor.command.InviteCommandProcessor;
 import io.kamax.mxisd.as.processor.command.LookupCommandProcessor;
 import io.kamax.mxisd.as.processor.command.PingCommandProcessor;
 import org.apache.commons.cli.*;
-import org.apache.commons.lang.text.StrBuilder;
+import org.apache.commons.lang3.text.StrBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
